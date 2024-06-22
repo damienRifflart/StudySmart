@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    @font-face {
+        font-family: "Geist";
+        font-weight: 100;
+
+        src: url("../assets/fonts/geist/Geist-Thin.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 200;
+
+        src: url("../assets/fonts/geist/Geist-UltraLight.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 300;
+
+        src: url("../assets/fonts/geist/Geist-Light.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 400;
+        font-style: normal;
+
+        src: url("../assets/fonts/geist/Geist-Regular.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 600;
+
+        src: url("../assets/fonts/geist/Geist-SemiBold.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 700;
+
+        src: url("../assets/fonts/geist/Geist-Bold.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 800;
+
+        src: url("../assets/fonts/geist/Geist-Black.woff2") format("woff2");
+    }
+    @font-face {
+        font-family: "Geist";
+        font-weight: 900;
+
+        src: url("../assets/fonts/geist/Geist-UltraBlack.woff2") format("woff2");
+    }
+}
+
+@layer base {
+    :root {
+        --background: 240 60%, 99%;
+        --foreground: 246 76% 5%;
+
+        --primary: 243 68% 48%;
+        --primary-foreground: 0 0 100%;
+
+        --secondary: 243 100% 93%;
+
+        --accent: 242 100% 62%;
+
+        --border: 214.3 31.8% 91.4%;
+        --input: 214.3 31.8% 91.4%;
+        --ring: 222.2 84% 4.9%;
+
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        --background: 240 60% 1%;
+        --foreground: 243 76% 95%;
+        
+        --primary: 243 68% 52%;
+
+        --secondary: 243 100% 7%;
+
+        --accent: 242 100% 38%;
+
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --ring: 212.7 26.8% 83.9%;
+
+        --radius: 0.5rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply m-0 border-border p-0 font-sans;
+    }
+    body {
+        @apply overflow-hidden bg-background text-foreground;
+    }
+    .draglayer {
+        @apply bg-background;
+        -webkit-app-region: drag;
+    }
+}

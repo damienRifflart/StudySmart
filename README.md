@@ -1,76 +1,136 @@
-<h1 align="center">electron-app</h1>
+# electron-shadcn
 
-<p align="center">An Electron application with Vue3 and TypeScript</p>
+Electron in all its glory. Everything you will need to develop your beautiful desktop application.
 
-<p align="center">
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron" alt="electron-version">
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron-vite" alt="electron-vite-version" />
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron-builder" alt="electron-builder-version" />
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/vite" alt="vite-version" />
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/vue" alt="vue-version" />
-<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/typescript" alt="typescript-version" />
-</p>
+![Demo GIF](https://github.com/LuanRoger/electron-shadcn/blob/main/images/demo.gif)
 
-<p align='center'>
-<img src='./build/electron-vite-vue-ts.png'/>
-</p>
+## Libs and tools
 
-## Features
+To develop a Electron app, you probably will need some UI, test, formatter, style or other kind of library or framework, so let me install and configure some of them to you.
 
-- 💡 Optimize asset handling
-- 🚀 Fast HMR for renderer processes
-- 🔥 Hot reloading for main process and preload scripts
-- 🔌 Easy to debug
-- 🔒 Compile to v8 bytecode to protect source code
+### Engine 🏍️
 
-## Getting Started
+- [Electron 30](https://www.electronjs.org)
+- [Vite 5](https://vitejs.dev)
+- [SWC](https://swc.rs)
 
-Read [documentation](https://electron-vite.org/) for more details.
+### DX 🛠️
 
-- [Configuring](https://electron-vite.org/config/)
-- [Development](https://electron-vite.org/guide/dev.html)
-- [Asset Handling](https://electron-vite.org/guide/assets.html)
-- [HMR](https://electron-vite.org/guide/hmr.html) & [Hot Reloading](https://electron-vite.org/guide/hot-reloading.html)
-- [Debugging](https://electron-vite.org/guide/debugging.html)
-- [Source code protection](https://electron-vite.org/guide/source-code-protection.html)
-- [Distribution](https://electron-vite.org/guide/distribution.html)
-- [Troubleshooting](https://electron-vite.org/guide/troubleshooting.html)
+- [TypeScript](https://www.typescriptlang.org)
+- [Prettier](https://prettier.io)
+- [Zod](https://zod.dev)
+- [React Query (Tan Stack)](https://react-query.tanstack.com)
 
-You can also use the [create-electron](https://github.com/alex8088/quick-start/tree/master/packages/create-electron) tool to scaffold your project for other frameworks (e.g. `React`, `Svelte` or `Solid`).
+### UI 🎨
 
-## Recommended IDE Setup
+- [React](https://reactjs.org)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Shadcn UI](https://ui.shadcn.com)
+- [Geist](https://vercel.com/font) as default font
+- [i18next](https://www.i18next.com)
+- [Lucide](https://lucide.dev)
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+### Test 🧪
 
-## Project Setup
+- [Jest](https://jestjs.io)
+- [Playwright](https://playwright.dev)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
 
-### Install
+### Packing and distribution 📦
 
-```bash
-$ npm install
+- [Electron Forge](https://www.electronforge.io)
+
+### Documentation 📚
+
+- [Storybook](https://storybook.js.org)
+
+### CI/CD 🚀
+
+- Pre-configured [GitHub Actions workflow](https://github.com/LuanRoger/electron-shadcn/blob/main/.github/workflows/playwright.yml) workflow, for test with Playwright
+
+### Project preferences 🎯
+
+- Use Context isolation
+- `titleBarStyle`: hidden (Using custom title bar)
+- Geist as default font
+- Some default styles was applied, check the [`styles`](https://github.com/LuanRoger/electron-shadcn/tree/main/src/styles) directory
+
+> If you don't know some of these libraries or tools, I recommend you to check their documentation to understand how they work and how to use them.
+
+## Directory structure
+
+```plaintext
+.
+└── ./src/
+    ├── ./src/assets/
+    │   └── ./src/assets/fonts/
+    ├── ./src/components/
+    │   └── ./src/components/ui/
+    ├── ./src/helpers/
+    │   └── ./src/helpers/ipc/
+    ├── ./src/layout/
+    ├── ./src/lib/
+    ├── ./src/pages/
+    ├── ./src/stories/
+    ├── ./src/style/
+    └── ./src/tests/
 ```
 
-### Development
+- `src/`: Main directory
+  - `assets/`: Store assets like images, fonts, etc.
+  - `components/`: Store UI components
+    - `ui/`: Store Shadcn UI components (this is the default direcotry used by Shadcn UI)
+  - `helpers/`: Store IPC related functions to be called in the renderer process
+    - `ipc/`: Directory to store IPC context and listener functions
+      - Some implementations are already done, like `theme` and `window` for the custom title bar
+  - `layout/`: Directory to store layout components
+  - `lib/`: Store libraries and other utilities
+  - `pages/`: Store app's pages
+  - `stories/`: Store Storybook stories
+  - `style/`: Store global styles
+  - `tests/`: Store tests (from Jest and Playwright)
+
+## NPM script
+
+To run any of those scripts:
 
 ```bash
-$ npm run dev
+npm run <script>
 ```
 
-### Build
+- `start`: Start the app in development mode
+- `package`: Package your application into a platform-specific executable bundle and put the result in a folder.
+- `make`: Generate platform-specific distributables (e.g. .exe, .dmg, etc) of your application for distribution.
+- `publish`: Electron Forge's way of taking the artifacts generated by the `make` command and sending them to a service somewhere for you to distribute or use as updates.
+- `prett`: Run Prettier to format the code
+- `storybook`: Start Storybook
+- `build-storybook`: Run the Storybook's build command
+- `test`: Run the default unit-test script (Jest)
+- `test:watch`: Run the default unit-test script in watch mode (Jest)
+- `test:unit`: Run the Jest tests
+- `test:e2e`: Run the Playwright tests
+- `test:all`: Run all tests (Jest and Playwright)
+
+The test scripts involving Playwright require the app be builded before running the tests. So, before run the tests, run the `package`, `make` or `publish` script.
+
+## How to use
+
+1. Clone this repository
 
 ```bash
-# For windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
+git clone https://github.com/LuanRoger/electron-shadcn.git
 ```
 
-## Examples
+Or use it as a template on GitHub
 
-- [electron-vite-bytecode-example](https://github.com/alex8088/electron-vite-bytecode-example), source code protection
-- [electron-vite-decorator-example](https://github.com/alex8088/electron-vite-decorator-example), typescipt decorator
-- [electron-vite-worker-example](https://github.com/alex8088/electron-vite-worker-example), worker and fork
+2. Install dependencies
+
+```bash
+npm install
+```
+
+3. Run the app
+
+```bash
+npm run start
+```
