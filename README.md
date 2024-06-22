@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1 align="center">electron-app</h1>
+
+<p align="center">An Electron application with Vue3 and TypeScript</p>
+
+<p align="center">
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron" alt="electron-version">
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron-vite" alt="electron-vite-version" />
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/electron-builder" alt="electron-builder-version" />
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/vite" alt="vite-version" />
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/vue" alt="vue-version" />
+<img src="https://img.shields.io/github/package-json/dependency-version/alex8088/electron-vite-boilerplate/dev/typescript" alt="typescript-version" />
+</p>
+
+<p align='center'>
+<img src='./build/electron-vite-vue-ts.png'/>
+</p>
+
+## Features
+
+- 💡 Optimize asset handling
+- 🚀 Fast HMR for renderer processes
+- 🔥 Hot reloading for main process and preload scripts
+- 🔌 Easy to debug
+- 🔒 Compile to v8 bytecode to protect source code
 
 ## Getting Started
 
-First, run the development server:
+Read [documentation](https://electron-vite.org/) for more details.
+
+- [Configuring](https://electron-vite.org/config/)
+- [Development](https://electron-vite.org/guide/dev.html)
+- [Asset Handling](https://electron-vite.org/guide/assets.html)
+- [HMR](https://electron-vite.org/guide/hmr.html) & [Hot Reloading](https://electron-vite.org/guide/hot-reloading.html)
+- [Debugging](https://electron-vite.org/guide/debugging.html)
+- [Source code protection](https://electron-vite.org/guide/source-code-protection.html)
+- [Distribution](https://electron-vite.org/guide/distribution.html)
+- [Troubleshooting](https://electron-vite.org/guide/troubleshooting.html)
+
+You can also use the [create-electron](https://github.com/alex8088/quick-start/tree/master/packages/create-electron) tool to scaffold your project for other frameworks (e.g. `React`, `Svelte` or `Solid`).
+
+## Recommended IDE Setup
+
+- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin)
+
+## Project Setup
+
+### Install
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+$ npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+$ npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Build
 
-## Learn More
+```bash
+# For windows
+$ npm run build:win
 
-To learn more about Next.js, take a look at the following resources:
+# For macOS
+$ npm run build:mac
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# For Linux
+$ npm run build:linux
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Examples
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- [electron-vite-bytecode-example](https://github.com/alex8088/electron-vite-bytecode-example), source code protection
+- [electron-vite-decorator-example](https://github.com/alex8088/electron-vite-decorator-example), typescipt decorator
+- [electron-vite-worker-example](https://github.com/alex8088/electron-vite-worker-example), worker and fork
