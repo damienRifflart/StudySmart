@@ -11,3 +11,4 @@ out
 .prettierignore
 .prettierrc.yaml
 package-lock.json
+.env
