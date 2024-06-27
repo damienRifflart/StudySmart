@@ -1,12 +1,16 @@
-import { ModeToggle } from "@/components/mode-toggle"
-import { HomeworkCard } from "@/components/HomeworkCard"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import supabase from '../../config/supabaseClient'
-import { useEffect, useState } from 'react'
+import {ModeToggle} from "@/components/mode-toggle"
+import {HomeworkCard} from "@/components/HomeworkCard"
+import {Button} from "@/components/ui/button"
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
+import {AddHomework} from "@/components/add-homework"
+import supabase from '@/config/supabaseClient'
+import {useEffect, useState} from 'react'
 
 function App(): JSX.Element {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [homeworks, setHomeworks] = useState<any[] | null>(null)
+  const [workTimeLeft, setWorkTimeLeft] = useState<Number>(Number)
+  const [addHomeworkCard, setAddHomeworkCard] = useState<Boolean>(Boolean)
 
   useEffect(() => {
     const fetchHomeworks = async () => {
@@ -23,12 +27,38 @@ function App(): JSX.Element {
 
         if (data) {
           setHomeworks(data);
+          const workTimeLeft = data.reduce((total, homework) => {
+            return total + parseInt(homework.time, 10);
+          }, 0);
+          setWorkTimeLeft(workTimeLeft)
           setFetchError(null);
         }
     }
     fetchHomeworks()
   }, [])
 
+  const showHomeworkCard = (aimedSubject: string) => {
+    return (
+      <>
+        {fetchError && (<p>{fetchError}</p>)}
+        {homeworks && (
+          <>
+            {homeworks.filter(homework => homework.subject === aimedSubject).length === 0 && (
+              <p className="text-2xl">Il n'y a pas de devoirs pour la matière {aimedSubject}.</p>
+            )}
+            <div className="flex flex-row flex-wrap">
+              {homeworks.map(homework => (
+                homework.subject === aimedSubject ? (
+                  <HomeworkCard key={homework.id} homework={homework}></HomeworkCard>
+                ) : null
+              ))}
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
+  
   const date = new Date();
   const listMonth = [
     "janvier", "février", "mars", "avril", "mai", "juin",
@@ -37,7 +67,11 @@ function App(): JSX.Element {
   const day = date.getDate();
   const month = listMonth[date.getMonth()];
   const year = date.getFullYear();
-  const formattedDate = `${day} ${month} ${year}`;
+  const formattedDate  = `${day} ${month} ${year}`;
+
+  function addHomework() {
+    setAddHomeworkCard(!addHomeworkCard)
+  }
 
   return (
     <>
@@ -54,8 +88,8 @@ function App(): JSX.Element {
           </div>
         </div>
 
-        <div className="relative left-[7rem] top-20 bg-red">
-          <Tabs defaultValue="Tout" className="w-full">
+        <div className="relative left-[7rem] top-20">
+          <Tabs defaultValue="Tout" className="w-[70rem]">
             <TabsList>
               <TabsTrigger value="Tout">Tout</TabsTrigger>
               <TabsTrigger value="Maths">Maths</TabsTrigger>
@@ -64,21 +98,54 @@ function App(): JSX.Element {
               <TabsTrigger value="Histoire">Histoire</TabsTrigger>
             </TabsList>
             <TabsContent value="Tout">
-              <p className="text-2xl mb-3">Tous les devoirs:</p>
-              {fetchError && (<p>{fetchError}</p>)}
-                {homeworks && (
-                  <div className="flex flex-row flex-wrap">
-                    {homeworks.map(homework => (
-                      <HomeworkCard key={homework.id} homework={homework}></HomeworkCard>
-                    )
+              <div className="w-full max-w-[59rem] relative flex flex-col">
+                <p className="text-2xl mb-3 mt-2">Tous les devoirs:</p>
+                  {fetchError && <p>{fetchError}</p>}
+                  {homeworks && (
+                    <div className="flex flex-row flex-wrap">
+                      {homeworks.map(homework => (
+                        <HomeworkCard key={homework.id} homework={homework}></HomeworkCard>
+                      ))}
+                    </div>
                   )}
-                </div>
-              )}
+                  <div className="absolute right-4 bottom-0">
+                    <Button onClick={addHomework} className="text-accent-foreground text-xl font-normal">
+                      Ajouter un devoir
+                    </Button>
+                  </div>
+                  <p className="text-2xl">
+                    Il te reste encore <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text">{workTimeLeft.toString()}</span> minutes de travail.
+                  </p>
+              </div>
+              <div className={`${addHomeworkCard ? 'hidden' : 'absolute right-[13rem] top-[5.5rem]'}`}>
+                  <AddHomework></AddHomework>
+              </div>
             </TabsContent>
-            <TabsContent value="Maths">Maths</TabsContent>
-            <TabsContent value="Français">Français</TabsContent>
-            <TabsContent value="Physique">Physique</TabsContent>
-            <TabsContent value="Histoire">Histoire</TabsContent>
+
+
+            <TabsContent value="Maths">
+              <div className="mt-3">
+                {showHomeworkCard('maths')}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="Français">
+              <div className="mt-3">
+                {showHomeworkCard('français')}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="Physique">
+              <div className="mt-3">
+                {showHomeworkCard('physique')}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="Histoire">
+              <div className="mt-3">
+                {showHomeworkCard('histoire')}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
