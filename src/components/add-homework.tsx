@@ -16,30 +16,25 @@ export function AddHomework() {
     const [deadline, setDeadline] = useState<string | null>(null);
 
     async function addDB() {
-        if (deadline === null) {
-            console.error('Deadline is not set.');
-            return;
-        }
+        const currentDate = new Date();
+        const deadlineDate = deadline ? new Date(deadline) : null;
+        const deadlineDifferenceInDays = deadlineDate ? Math.ceil((deadlineDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
 
-        const today = new Date();
-        const deadlineDate = new Date(deadline);
-        const deadlineDifference = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const newHomework = {
+            created_at: currentDate,
+            subject: subject,
+            description: description.toString(),
+            time: time,
+            deadline: deadlineDifferenceInDays
+        };
+
         const { error } = await supabase
-          .from('homeworks')
-          .insert(
-            {
-              created_at: today,
-              subject: subject,
-              description: description.toString(),
-              time: time,
-              deadline: deadlineDifference,
-              done: false
-            },
-          )
-          .select()
+            .from('homeworks')
+            .insert(newHomework)
+            .select();
 
         if (error) {
-            console.log(`Error while inserting homework: ${error}`)
+            console.error(`Error while inserting homework: ${error}`);
         }
     }
     
