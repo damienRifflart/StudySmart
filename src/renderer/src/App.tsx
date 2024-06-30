@@ -5,6 +5,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
 import {AddHomework} from "@/components/add-homework"
 import supabase from '@/config/supabaseClient'
 import {useEffect, useState} from 'react'
+import {motion} from "framer-motion"
 
 interface Homework {
   created_at: Date,
@@ -15,32 +16,42 @@ interface Homework {
   done: boolean
 }
 
-function App(): JSX.Element {
+function App() {
   const [error, setError] = useState<string | null>(null);
   const [homeworks, setHomeworks] = useState<Homework[]>([]);
   const [workTimeLeft, setWorkTimeLeft] = useState<number>(0);
   const [showAddHomework, setShowAddHomework] = useState<boolean>(false);
+  const [subjects, setSubjects] = useState<string[]>([]);
 
+  // Fetches the homeworks data from the database and updates the state with the fetched data.
   useEffect(() => {
-    const fetchHomeworks = async () => {
-      const { data, error } = await supabase.from('homeworks').select();
+    const fetchHomeworks = async (): Promise<void> => {
+      // Fetch the data from the database
+      const { homeworks, error } = await supabase.from('homeworks').select();
 
       if (error) {
+        // If there was an error, set the error state and log the error
         setError('Could not fetch the homeworks');
         console.error(error);
-      }
-
-      if (data) {
+      } else {
         let totalTime = 0;
-        data.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
-        setHomeworks(data);
+        // Iterate over the fetched data and calculate the total time
+        homeworks.map((homework: Homework) => { 
+          if (!homework.done) {
+            totalTime += Number(homework.time);
+          }
+        });
+
+        const {subjects} = await supabase.from('subjects').select('name');
+        console.log(subjects)
+        // Update the state with the fetched data and the calculated total time
         setWorkTimeLeft(totalTime);
+        setHomeworks(homeworks);
       }
     };
 
     fetchHomeworks();
-  }, []);
-
+  }, [homeworks]);
 
   const formatDate = (date: Date): string => {
     const monthNames = [
@@ -57,34 +68,53 @@ function App(): JSX.Element {
     const filteredHomeworks = homeworks.filter(homework => homework.subject === activeTab);
 
     return (
-      <div>
-        <div className="flex flex-row flex-wrap">
-          {filteredHomeworks.length === 0 ? (
-            <p className="text-2xl">
-              {activeTab != 'Tout' ? `Il n\'y a pas de devoirs pour la matière ${activeTab}.` : null}
-            </p>
-          ) : (
+      <div className="">
+        <div className="flex flex-row flex-wrap max-h-[30rem] overflow-y-auto">
+          {activeTab != 'Tout' ? ( 
             filteredHomeworks.map(homework => (
-              <HomeworkCard key={homework.created_at} homework={homework} />
+              <motion.div
+                initial={{ opacity: 0, y:-20 }}
+                animate={{
+                  opacity: 1 ,
+                  y: 0,
+                }}
+                transition={{ duration: 0.2 }}
+                >
+                <HomeworkCard key={homework.created_at} homework={homework} />
+              </motion.div>
+            ))
+          ) : (
+            homeworks.map(homework => (
+              <motion.div
+              initial={{ opacity: 0, y:-20  }}
+              animate={{
+                opacity: 1 ,
+                y: 0,
+              }}
+              transition={{ duration: 0.2 }}
+              >
+                <HomeworkCard key={homework.created_at} homework={homework} />
+              </motion.div>
             ))
           )}
-        </div>
-
-        <div className="flex flex-row flex-wrap">
-          {activeTab === 'Tout' ? (
-            homeworks.length === 0 ? (
-              <p className="text-2xl">Il n'y a pas de devoirs.</p>
-            ) : (
-              homeworks.map(homework => (
-                <HomeworkCard key={homework.created_at} homework={homework} />
-              ))
-            )
-          ) : null}
         </div>
       </div>
     );
   };
 
+  // Fetches every subjects from the database
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      const { data } = await supabase.from('subjects').select('subject');
+      // Map the fetched data to an array of subjects and add a default subject
+      const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
+
+      setSubjects(subjects);
+    };
+
+    fetchSubjects();
+  }, []);
+  
   return (
     <>
       <div className="flex flex-col">
@@ -94,7 +124,7 @@ function App(): JSX.Element {
               <ModeToggle />
             </div>
             <div className="ml-[6rem] flex flex-col">
-              <h1>Bonjour, <span className='bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text'>Damien</span></h1>
+              <h1>Bonjour, <span className='text-primary'>Damien</span></h1>
               <h1>On est le <span>{formatDate(new Date())}</span></h1>
             </div>
           </div>
@@ -103,17 +133,19 @@ function App(): JSX.Element {
         <div className="relative left-[7rem] top-20">
           <Tabs defaultValue="Tout" className="w-[70rem]">
             <TabsList>
-              <TabsTrigger value="Tout">Tout</TabsTrigger>
-              <TabsTrigger value="Maths">Maths</TabsTrigger>
-              <TabsTrigger value="Français">Français</TabsTrigger>
-              <TabsTrigger value="Physique">Physique</TabsTrigger>
-              <TabsTrigger value="Histoire">Histoire</TabsTrigger>
+              <TabsTrigger value='Tout'>Tout</TabsTrigger>
+                {
+                  subjects.map((subject) => (
+                    <TabsTrigger key={subject} value={subject}>{subject}</TabsTrigger>
+                  ))
+                }
             </TabsList>
 
             <TabsContent value="Tout">
               <div className="w-full max-w-[59rem] relative flex flex-col mt-4">
                 {error && <p>{error}</p>}
                 {renderHomeworkCard('Tout')}
+
                 <div className="flex flex-row mt-4">
                   <div className="absolute right-5 bottom-0">
                     <Button onClick={() => setShowAddHomework(!showAddHomework)} className="text-accent-foreground text-xl font-normal">
@@ -122,22 +154,33 @@ function App(): JSX.Element {
                   </div>
                   <p className="text-2xl">
                     Il te reste encore
-                    <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text">{' ' + workTimeLeft.toString()}</span> minutes de travail.
+                    <span className="text-primary">{' ' + workTimeLeft.toString()}</span> minutes de travail.
                   </p>
                 </div>
               </div>
-              <div className={`${showAddHomework ? 'hidden' : 'absolute right-[13rem] top-[5.5rem]'}`}>
+                
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{
+                opacity: showAddHomework ? 1 : 0,
+                y: showAddHomework ? 0 : -20,
+              }}
+              transition={{ duration: 0.2 }}
+              className='absolute right-[13rem] top-[5.5rem]'
+            >
                 <AddHomework />
-              </div>
+              </motion.div>
             </TabsContent>
 
-            {['Maths', 'Français', 'Physique', 'Histoire'].map(subject => (
-              <TabsContent key={subject} value={subject}>
-                <div className="mt-3">
-                  {renderHomeworkCard(subject)}
-                </div>
-              </TabsContent>
-            ))}
+            {
+              subjects.map(subject => (
+                <TabsContent key={subject} value={subject}>
+                  <div className="mt-3">
+                    {renderHomeworkCard(subject)}
+                  </div>
+                </TabsContent>
+              ))
+            }
           </Tabs>
         </div>
       </div>

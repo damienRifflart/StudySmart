@@ -7,13 +7,15 @@ import {format} from "date-fns"
 import {Calendar as CalendarIcon} from "lucide-react"
 import {Calendar} from "@/components/ui/calendar"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 
 export function AddHomework() {
     const [subject, setSubject] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [time, setTime] = useState<string>('');
     const [deadline, setDeadline] = useState<string | null>(null);
+    const [subjects, setSubjects] = useState<string[]>([]);
+    const [newSubject, setNewSubject] = useState<string>('');
 
     async function addDB() {
         const currentDate = new Date();
@@ -38,8 +40,26 @@ export function AddHomework() {
         }
     }
     
+    useEffect(() => {
+        const fetchSubjects = async () => {
+          const { data } = await supabase.from('subjects').select('subject');
+          // Map the fetched data to an array of subjects and add a default subject
+          const subjects = ['Maths', ...data.map(({ subject }: { subject: string }) => subject)];
+    
+          setSubjects(subjects);
+        };
+    
+        fetchSubjects();
+    }, []);
+
+    async function addNewSubject() {
+        const {error} = await supabase
+            .from('subjects')
+            .insert({subject: newSubject})
+    }
+
     return(
-        <Card>
+        <Card className="bg-secondary">
             <CardHeader>
             <CardTitle>Ajouter un devoir</CardTitle>
             </CardHeader>
@@ -50,11 +70,21 @@ export function AddHomework() {
                 </SelectTrigger>
                 <SelectContent>
                 <SelectGroup>
-                    <SelectLabel>Maths</SelectLabel>
-                    <SelectItem value="Maths">Maths</SelectItem>
-                    <SelectItem value="Français">Français</SelectItem>
-                    <SelectItem value="Physique">Physique</SelectItem>
-                    <SelectItem value="Histoire">Histoire</SelectItem>
+                    <div className="text-mg relative flex flex-row mb-2">
+                        <Input 
+                            className="h-[2rem]"
+                            placeholder="Nouvelle matière" 
+                            value={newSubject} 
+                            onChange={(e) => setNewSubject(e.target.value)} 
+                        />
+                        <Button onClick={addNewSubject} className="w-[4rem] ml-2 h-[2rem] text-accent-foreground">Ajouter</Button>
+                    </div>
+                    {
+                        subjects.map((subject) => (
+                            <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                        ))
+                    }
+
                 </SelectGroup>
                 </SelectContent>
             </Select>
@@ -81,7 +111,7 @@ export function AddHomework() {
             <Input className="mt-4" placeholder="Temps requis (minutes)" type="number" value={time} onChange={(e) => setTime(e.target.value)} />
             </CardContent>
             <CardFooter>
-            <Button className="text-accent-foreground text-xl text-normal" onClick={addDB}>Ajouter</Button>
+            <Button className="text-accent-foreground text-xl" onClick={addDB}>Ajouter</Button>
             </CardFooter>
         </Card>
     )
