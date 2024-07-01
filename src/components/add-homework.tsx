@@ -15,7 +15,18 @@ export function AddHomework() {
     const [time, setTime] = useState<string>('');
     const [deadline, setDeadline] = useState<string | null>(null);
     const [subjects, setSubjects] = useState<string[]>([]);
-    const [newSubject, setNewSubject] = useState<string>('');
+
+    useEffect(() => {
+        const fetchSubjects = async () => {
+          const { data } = await supabase.from('subjects').select('subject');
+          // Map the fetched data to an array of subjects and add a default subject
+          const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
+    
+          setSubjects(subjects);
+        };
+    
+        fetchSubjects();
+    }, []);
 
     async function addDB() {
         const currentDate = new Date();
@@ -39,23 +50,16 @@ export function AddHomework() {
             console.error(`Error while inserting homework: ${error}`);
         }
     }
-    
-    useEffect(() => {
-        const fetchSubjects = async () => {
-          const { data } = await supabase.from('subjects').select('subject');
-          // Map the fetched data to an array of subjects and add a default subject
-          const subjects = ['Maths', ...data.map(({ subject }: { subject: string }) => subject)];
-    
-          setSubjects(subjects);
-        };
-    
-        fetchSubjects();
-    }, []);
 
     async function addNewSubject() {
         const {error} = await supabase
             .from('subjects')
-            .insert({subject: newSubject})
+            .insert({subject})
+            .select();
+        if (!error) {
+            setSubjects([...subjects, subject]);
+            setSubject('');
+        }
     }
 
     return(
@@ -74,8 +78,8 @@ export function AddHomework() {
                         <Input 
                             className="h-[2rem]"
                             placeholder="Nouvelle matière" 
-                            value={newSubject} 
-                            onChange={(e) => setNewSubject(e.target.value)} 
+                            value={subject} 
+                            onChange={(e) => setSubject(e.target.value)}
                         />
                         <Button onClick={addNewSubject} className="w-[4rem] ml-2 h-[2rem] text-accent-foreground">Ajouter</Button>
                     </div>
@@ -111,7 +115,7 @@ export function AddHomework() {
             <Input className="mt-4" placeholder="Temps requis (minutes)" type="number" value={time} onChange={(e) => setTime(e.target.value)} />
             </CardContent>
             <CardFooter>
-            <Button className="text-accent-foreground text-xl" onClick={addDB}>Ajouter</Button>
+            <Button className="text-primary-foreground text-xl" disabled={!subject || !deadline || !time || !description} onClick={addDB}>Ajouter</Button>
             </CardFooter>
         </Card>
     )

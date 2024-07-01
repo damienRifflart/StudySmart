@@ -6,6 +6,9 @@ import {AddHomework} from "@/components/add-homework"
 import supabase from '@/config/supabaseClient'
 import {useEffect, useState} from 'react'
 import {motion} from "framer-motion"
+import {Trash2} from "lucide-react"
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
+import {DeletedHomework} from "@/components/deleted-homework"
 
 interface Homework {
   created_at: Date,
@@ -23,35 +26,38 @@ function App() {
   const [showAddHomework, setShowAddHomework] = useState<boolean>(false);
   const [subjects, setSubjects] = useState<string[]>([]);
 
-  // Fetches the homeworks data from the database and updates the state with the fetched data.
+  // Fetches the homeworks data from the database
   useEffect(() => {
-    const fetchHomeworks = async (): Promise<void> => {
-      // Fetch the data from the database
-      const { homeworks, error } = await supabase.from('homeworks').select();
+    const fetchHomeworks = async () => {
+      const { data, error } = await supabase.from('homeworks').select();
 
       if (error) {
-        // If there was an error, set the error state and log the error
         setError('Could not fetch the homeworks');
         console.error(error);
-      } else {
-        let totalTime = 0;
-        // Iterate over the fetched data and calculate the total time
-        homeworks.map((homework: Homework) => { 
-          if (!homework.done) {
-            totalTime += Number(homework.time);
-          }
-        });
+      }
 
-        const {subjects} = await supabase.from('subjects').select('name');
-        console.log(subjects)
-        // Update the state with the fetched data and the calculated total time
+      if (data) {
+        let totalTime = 0;
+        data.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
+        setHomeworks(data);
         setWorkTimeLeft(totalTime);
-        setHomeworks(homeworks);
       }
     };
 
     fetchHomeworks();
   }, [homeworks]);
+
+  // Fetches every subjects from the database
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      const { data } = await supabase.from('subjects').select('subject');
+      // Map the fetched data to an array of subjects and add a default subject
+      const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
+      setSubjects(subjects);
+    };
+
+    fetchSubjects();
+  }, [subjects]);
 
   const formatDate = (date: Date): string => {
     const monthNames = [
@@ -68,7 +74,7 @@ function App() {
     const filteredHomeworks = homeworks.filter(homework => homework.subject === activeTab);
 
     return (
-      <div className="">
+      <div>
         <div className="flex flex-row flex-wrap max-h-[30rem] overflow-y-auto">
           {activeTab != 'Tout' ? ( 
             filteredHomeworks.map(homework => (
@@ -86,13 +92,13 @@ function App() {
           ) : (
             homeworks.map(homework => (
               <motion.div
-              initial={{ opacity: 0, y:-20  }}
-              animate={{
-                opacity: 1 ,
-                y: 0,
-              }}
-              transition={{ duration: 0.2 }}
-              >
+                initial={{ opacity: 0, y:-20  }}
+                animate={{
+                  opacity: 1 ,
+                  y: 0,
+                }}
+                transition={{ duration: 0.2 }}
+                >
                 <HomeworkCard key={homework.created_at} homework={homework} />
               </motion.div>
             ))
@@ -101,19 +107,6 @@ function App() {
       </div>
     );
   };
-
-  // Fetches every subjects from the database
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      const { data } = await supabase.from('subjects').select('subject');
-      // Map the fetched data to an array of subjects and add a default subject
-      const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
-
-      setSubjects(subjects);
-    };
-
-    fetchSubjects();
-  }, []);
   
   return (
     <>
@@ -128,6 +121,33 @@ function App() {
               <h1>On est le <span>{formatDate(new Date())}</span></h1>
             </div>
           </div>
+        </div>
+
+        <div className="absolute top-[9rem] right-[10rem]">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="trash"><Trash2 size={18}/></Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Poubelle</DialogTitle>
+                <DialogDescription>
+                  Vous trouverez tous les devoirs finis. Ils expirent après 15 jours.
+                </DialogDescription>
+              </DialogHeader>
+                <div className="flex flex-row flex-wrap max-h-[12rem] overflow-y-auto ">
+                  {
+                    homeworks.map((homework) => (
+                      <div className="flex flex-row">
+                        {
+                          homework.done ? <DeletedHomework homework={homework}></DeletedHomework> : null
+                        }
+                      </div>
+                    ))
+                  }
+                </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="relative left-[7rem] top-20">
@@ -148,7 +168,7 @@ function App() {
 
                 <div className="flex flex-row mt-4">
                   <div className="absolute right-5 bottom-0">
-                    <Button onClick={() => setShowAddHomework(!showAddHomework)} className="text-accent-foreground text-xl font-normal">
+                    <Button onClick={() => setShowAddHomework(!showAddHomework)} className="text-primary-foreground text-xl font-normal">
                       Ajouter un devoir
                     </Button>
                   </div>
@@ -158,7 +178,7 @@ function App() {
                   </p>
                 </div>
               </div>
-                
+
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{

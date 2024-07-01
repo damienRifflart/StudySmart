@@ -25,7 +25,9 @@ export function HomeworkCard({ homework }) {
                     </div>
                 </div>
                 <div className="flex justify-center items-center">
-                    <Button onClick={doneToggleBtn} className="mb-3 pr-[4rem] text-xl text-center font-normal text-accent-foreground">Déclarer comme fait</Button>
+                    <Button onClick={doneToggleBtn} className="mb-3 pr-[2rem] text-xl font-normal text-primary-foreground">
+                        <p className='pl-4'>Déclarer comme fait</p>
+                    </Button>
                 </div>
             </div>
         ) : (
