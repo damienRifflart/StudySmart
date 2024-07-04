@@ -38,7 +38,7 @@ export function AddHomework() {
             subject: subject,
             description: description.toString(),
             time: time,
-            deadline: deadlineDifferenceInDays
+            deadline: deadlineDifferenceInDays,
         };
 
         const { error } = await supabase
