@@ -19,7 +19,7 @@ interface Homework {
     time: string,
     deadline: Number,
     done: boolean,
-    user: string
+    userid: string
   }
 
 function HomePage() {
@@ -30,17 +30,6 @@ function HomePage() {
     const [subjects, setSubjects] = useState<string[]>([]);
     const [user, setUser] = useState({});
     const navigate = useNavigate();
-
-    useEffect(() => {
-        async function getUserData() {
-            await supabase.auth.getUser().then((value) => {
-                if (value.data?.user) {
-                    setUser(value.data.user);
-                }
-            })
-        }
-        getUserData()
-    })
 
     async function signOut() {
         const {error} = await supabase.auth.signOut()
@@ -58,9 +47,11 @@ function HomePage() {
       }
 
       if (data) {
+        const userId = (await supabase.auth.getUser()).data.user.id;
+        const filteredHomeworks = data.filter(homework => homework.userid === userId);
         let totalTime = 0;
-        data.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
-        setHomeworks(data);
+        filteredHomeworks.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
+        setHomeworks(filteredHomeworks);
         setWorkTimeLeft(totalTime);
       }
     };
@@ -71,10 +62,20 @@ function HomePage() {
   // Fetches every subjects from the database
   useEffect(() => {
     const fetchSubjects = async () => {
-      const { data } = await supabase.from('subjects').select('subject');
+      const { data, error } = await supabase.from('subjects').select();
+
+      if (error) {
+        setError('Could not fetch the subjects');
+        console.error(error);
+      }
+
       // Map the fetched data to an array of subjects and add a default subject
-      const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
-      setSubjects(subjects);
+      if (data) {
+        const userId = (await supabase.auth.getUser()).data.user.id;
+        const filteredSubjects = data.filter(subject => subject.userid === userId);
+        const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
+        setSubjects(subjects);
+      }
     };
 
     fetchSubjects();

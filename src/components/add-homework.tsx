@@ -39,6 +39,7 @@ export function AddHomework() {
             description: description.toString(),
             time: time,
             deadline: deadlineDifferenceInDays,
+            userid: (await supabase.auth.getUser()).data.user.id,
         };
 
         const { error } = await supabase
@@ -52,12 +53,18 @@ export function AddHomework() {
     }
 
     async function addNewSubject() {
-        const {error} = await supabase
+        const { data } = await supabase
             .from('subjects')
-            .insert({subject})
+            .insert({
+                subject: subject,
+                userid: (await supabase.auth.getUser()).data.user.id
+            })
             .select();
-        if (!error) {
-            setSubjects([...subjects, subject]);
+
+        if (data) {
+            const userId = (await supabase.auth.getUser()).data.user.id;
+            const filteredSubjects = data.filter(subject => subject.userid === userId);
+            setSubjects([...subjects, filteredSubjects]);
             setSubject('');
         }
     }
