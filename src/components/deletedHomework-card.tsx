@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {Button} from "@/components/ui/button";
 import supabase from '@/config/supabaseClient'
 
@@ -15,9 +15,6 @@ export function DeletedHomework({homework}) {
                 .then(() => {
                     console.log('Devoir supprimé');
                 })
-                .catch((error) => {
-                    console.log('Erreur lors de la suppression du devoir', error);
-                });
         }
     }, [])
 
@@ -35,7 +32,7 @@ export function DeletedHomework({homework}) {
                 <p className='whitespace-pre-wrap break-words mt-2 text-mg'>{homework.subject}</p>
             </div>
             <div className="flex justify-center items-center">
-                <Button onClick={undoToggle} size={10} className="mb-3 p-[5px] pr-[20px] text-mg text-center font-normal text-primary-foreground">
+                <Button onClick={undoToggle} className="mb-3 p-[5px] pr-[20px] text-mg text-center font-normal text-primary-foreground">
                         <p className="pl-3">
                             Annuler
                         </p>

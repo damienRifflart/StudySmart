@@ -1,34 +1,42 @@
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
-import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue} from "@/components/ui/select"
+import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {Input} from "@/components/ui/input"
 import supabase from '@/config/supabaseClient'
 import {format} from "date-fns"
 import {Calendar as CalendarIcon} from "lucide-react"
 import {Calendar} from "@/components/ui/calendar"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
-import React, {useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 
 export function AddHomework() {
     const [subject, setSubject] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [time, setTime] = useState<string>('');
-    const [deadline, setDeadline] = useState<string | null>(null);
+    const [deadline, setDeadline] = useState<string>('');
     const [subjects, setSubjects] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchSubjects = async () => {
-          const { data } = await supabase.from('subjects').select('subject');
-          // Map the fetched data to an array of subjects and add a default subject
-          const subjects = [...data.map(({ subject }: { subject: string }) => subject)];
+            const { data, error } = await supabase.from('subjects').select();
     
-          setSubjects(subjects);
+            if (error) {
+                console.error(error);
+            }
+    
+            // Map the fetched data to an array of subjects and add a default subject
+            if (data) {
+                const userId = (await supabase.auth.getUser()).data.user?.id;
+                const filteredSubjects = data.filter(subject => subject.userid === userId);
+                const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
+                setSubjects(subjects);
+            }
         };
     
         fetchSubjects();
-    }, []);
+    }, [subjects]);
 
-    async function addDB() {
+    async function addNewHomework() {
         const currentDate = new Date();
         const deadlineDate = deadline ? new Date(deadline) : null;
         const deadlineDifferenceInDays = deadlineDate ? Math.ceil((deadlineDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
@@ -39,7 +47,7 @@ export function AddHomework() {
             description: description.toString(),
             time: time,
             deadline: deadlineDifferenceInDays,
-            userid: (await supabase.auth.getUser()).data.user.id,
+            userid: (await supabase.auth.getUser()).data.user?.id,
         };
 
         const { error } = await supabase
@@ -53,19 +61,27 @@ export function AddHomework() {
     }
 
     async function addNewSubject() {
-        const { data } = await supabase
+        const { data } = await supabase.from('subjects').select();
+        let ids: number[] = [];
+        if (data) {
+            ids = data?.map((subject) => subject.id);
+        }
+
+        const maxId = Math.max(...ids) 
+
+        const newSubject = {
+            id: maxId+1,
+            subject: subject,
+            userid: (await supabase.auth.getUser()).data.user?.id
+        };
+
+        const { error } = await supabase
             .from('subjects')
-            .insert({
-                subject: subject,
-                userid: (await supabase.auth.getUser()).data.user.id
-            })
+            .insert(newSubject)
             .select();
 
-        if (data) {
-            const userId = (await supabase.auth.getUser()).data.user.id;
-            const filteredSubjects = data.filter(subject => subject.userid === userId);
-            setSubjects([...subjects, filteredSubjects]);
-            setSubject('');
+        if (error) {
+            console.error(`Error while inserting subject: ${error}`);
         }
     }
 
@@ -91,7 +107,7 @@ export function AddHomework() {
                         <Button onClick={addNewSubject} className="w-[4rem] ml-2 h-[2rem] text-accent-foreground">Ajouter</Button>
                     </div>
                     {
-                        subjects.map((subject) => (
+                        subjects.length !== 0 && subjects.map((subject) => (
                             <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                         ))
                     }
@@ -113,8 +129,8 @@ export function AddHomework() {
                 <PopoverContent className="w-auto p-0">
                 <Calendar
                     mode="single"
-                    selected={deadline}
-                    onSelect={setDeadline}
+                    selected={deadline ? new Date(deadline) : undefined}
+                    onSelect={(date: Date | undefined) => setDeadline(date ? format(date, "yyyy-MM-dd") : "")}
                     initialFocus
                 />
                 </PopoverContent>
@@ -122,7 +138,7 @@ export function AddHomework() {
             <Input className="mt-4" placeholder="Temps requis (minutes)" type="number" value={time} onChange={(e) => setTime(e.target.value)} />
             </CardContent>
             <CardFooter>
-            <Button className="text-primary-foreground text-xl" disabled={!subject || !deadline || !time || !description} onClick={addDB}>Ajouter</Button>
+            <Button className="text-primary-foreground text-xl" disabled={!subject || !deadline || !time || !description} onClick={addNewHomework}>Ajouter</Button>
             </CardFooter>
         </Card>
     )

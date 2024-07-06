@@ -1,15 +1,15 @@
-import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
-import Login from "@/components/login-page"
-import HomePage from "@/components/homepage"
+import { HashRouter, Routes, Route } from "react-router-dom";
+import Login from "@/pages/login"
+import HomePage from "@/pages/homepage"
 
 function App() {
   return(
-    <Router>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Login />}></Route>
         <Route path="/success" element={<HomePage />}></Route>
       </Routes>
-    </Router>
+    </HashRouter>
   )
 }
 

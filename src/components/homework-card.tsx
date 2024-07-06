@@ -1,4 +1,3 @@
-import React from 'react'
 import { Button } from '@/components/ui/button'
 import supabase from '@/config/supabaseClient'
 export function HomeworkCard({ homework }) {

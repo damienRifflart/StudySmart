@@ -2,15 +2,12 @@ import {ModeToggle} from "@/components/mode-toggle"
 import {HomeworkCard} from "@/components/homework-card"
 import {Button} from "@/components/ui/button"
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs"
-import {AddHomework} from "@/components/add-homework"
+import {AddHomework} from "@/components/addHomework-panel"
 import supabase from '@/config/supabaseClient'
 import {useEffect, useState} from 'react'
 import {motion} from "framer-motion"
-import {Trash2} from "lucide-react"
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
-import {DeletedHomework} from "@/components/deleted-homework"
-import React from 'React'
 import {useNavigate} from "react-router-dom"
+import {Bin} from '@/components/bin'
 
 interface Homework {
     created_at: Date,
@@ -23,31 +20,29 @@ interface Homework {
   }
 
 function HomePage() {
-    const [error, setError] = useState<string | null>(null);
     const [homeworks, setHomeworks] = useState<Homework[]>([]);
     const [workTimeLeft, setWorkTimeLeft] = useState<number>(0);
     const [showAddHomework, setShowAddHomework] = useState<boolean>(false);
     const [subjects, setSubjects] = useState<string[]>([]);
-    const [user, setUser] = useState({});
     const navigate = useNavigate();
 
-    async function signOut() {
+  async function signOut() {
         const {error} = await supabase.auth.signOut()
+        error ? console.log(error) : null
         navigate("/")
     }
   
-  // Fetches the homeworks data from the database
+  // Fetches the homeworks & subjects data from the database
   useEffect(() => {
     const fetchHomeworks = async () => {
       const { data, error } = await supabase.from('homeworks').select();
 
       if (error) {
-        setError('Could not fetch the homeworks');
         console.error(error);
       }
 
       if (data) {
-        const userId = (await supabase.auth.getUser()).data.user.id;
+        const userId = (await supabase.auth.getUser()).data.user?.id;
         const filteredHomeworks = data.filter(homework => homework.userid === userId);
         let totalTime = 0;
         filteredHomeworks.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
@@ -56,30 +51,25 @@ function HomePage() {
       }
     };
 
-    fetchHomeworks();
-  }, [homeworks]);
-
-  // Fetches every subjects from the database
-  useEffect(() => {
     const fetchSubjects = async () => {
       const { data, error } = await supabase.from('subjects').select();
 
       if (error) {
-        setError('Could not fetch the subjects');
         console.error(error);
       }
 
       // Map the fetched data to an array of subjects and add a default subject
       if (data) {
-        const userId = (await supabase.auth.getUser()).data.user.id;
+        const userId = (await supabase.auth.getUser()).data.user?.id;
         const filteredSubjects = data.filter(subject => subject.userid === userId);
         const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
         setSubjects(subjects);
       }
     };
 
+    fetchHomeworks();
     fetchSubjects();
-  }, [subjects]);
+  }, [homeworks, subjects]);
 
   const formatDate = (date: Date): string => {
     const monthNames = [
@@ -108,7 +98,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.created_at} homework={homework} />
+                <HomeworkCard key={homework.created_at.toISOString()} homework={homework} /> 
               </motion.div>
             ))
           ) : (
@@ -121,7 +111,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.created_at} homework={homework} />
+                <HomeworkCard key={homework.created_at.toISOString()} homework={homework} />
               </motion.div>
             ))
           )}
@@ -132,7 +122,7 @@ function HomePage() {
   
   return (
     <>
-      <div className="flex flex-col">
+      <div>
         <div className="top-5 left-5 relative">
           <div className="text-4xl font-semibold w-screen">
             <div className="absolute">
@@ -145,39 +135,16 @@ function HomePage() {
           </div>
         </div>
 
-      <div className="absolute top-5 right-5">
-        <Button variant="outline" onClick={() => signOut()}>Se déconnecter</Button>
-      </div>
-
-        <div className="absolute top-[9rem] right-[10rem]">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="trash"><Trash2 size={18}/></Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Poubelle</DialogTitle>
-                <DialogDescription>
-                  Vous trouverez tous les devoirs finis. Ils expirent après 15 jours.
-                </DialogDescription>
-              </DialogHeader>
-                <div className="flex flex-row flex-wrap max-h-[12rem] overflow-y-auto ">
-                  {
-                    homeworks.map((homework) => (
-                      <div className="flex flex-row">
-                        {
-                          homework.done ? <DeletedHomework homework={homework}></DeletedHomework> : null
-                        }
-                      </div>
-                    ))
-                  }
-                </div>
-            </DialogContent>
-          </Dialog>
+        <div className="absolute top-5 right-5">
+          <Button variant="outline" onClick={() => signOut()}>Se déconnecter</Button>
         </div>
+
+        <Bin homeworks={homeworks} />
+
 
         <div className="relative left-[7rem] top-20">
           <Tabs defaultValue="Tout" className="w-[70rem]">
+            {/* Subjects tabs */}
             <TabsList>
               <TabsTrigger value='Tout'>Tout</TabsTrigger>
                 {
@@ -187,35 +154,11 @@ function HomePage() {
                 }
             </TabsList>
 
+            {/* Tabs content */}
             <TabsContent value="Tout">
               <div className="w-full max-w-[59rem] relative flex flex-col mt-4">
-                {error && <p>{error}</p>}
                 {renderHomeworkCard('Tout')}
-
-                <div className="flex flex-row mt-4">
-                  <div className="absolute right-5 bottom-0">
-                    <Button onClick={() => setShowAddHomework(!showAddHomework)} className="text-primary-foreground text-xl font-normal">
-                      Ajouter un devoir
-                    </Button>
-                  </div>
-                  <p className="text-2xl">
-                    Il te reste encore
-                    <span className="text-primary">{' ' + workTimeLeft.toString()}</span> minutes de travail.
-                  </p>
-                </div>
               </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{
-                opacity: showAddHomework ? 1 : 0,
-                y: showAddHomework ? 0 : -20,
-              }}
-              transition={{ duration: 0.2 }}
-              className='absolute right-[13rem] top-[5.5rem]'
-            >
-                <AddHomework />
-              </motion.div>
             </TabsContent>
 
             {
@@ -228,6 +171,22 @@ function HomePage() {
               ))
             }
           </Tabs>
+
+          <div>
+            <div className="absolute ml-[45rem]">
+              <Button onClick={() => setShowAddHomework(!showAddHomework)} className="text-primary-foreground text-xl font-normal">
+                Ajouter un devoir
+              </Button>
+            </div>
+            <p className="text-2xl">
+              Il te reste encore <span className="text-primary">{' ' + workTimeLeft.toString()}</span> minutes de travail.
+            </p>
+          </div>
+
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{opacity: showAddHomework ? 1 : 0, y: showAddHomework ? 0 : -20}} transition={{ duration: 0.2 }} className='absolute right-[13rem] top-[5.5rem]'>
+            <AddHomework />
+          </motion.div>
+
         </div>
       </div>
     </>
