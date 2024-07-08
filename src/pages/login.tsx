@@ -12,7 +12,7 @@ function Login() {
             navigate("/success") 
         } else {
             // forward to login page
-            navigate("/") 
+            navigate("/")
         }
     })
 
@@ -25,7 +25,6 @@ function Login() {
                         supabaseClient={supabase}
                         appearance={{ theme: ThemeSupa}}
                         theme="dark"
-                        providers={["discord"]}
                         localization={{
                             variables: {
                             sign_in: {

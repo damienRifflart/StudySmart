@@ -8,8 +8,10 @@ import {useEffect, useState} from 'react'
 import {motion} from "framer-motion"
 import {useNavigate} from "react-router-dom"
 import {Bin} from '@/components/bin'
+import { access } from "fs"
 
 interface Homework {
+    id: number,
     created_at: Date,
     subject: string,
     description: string,
@@ -30,46 +32,79 @@ function HomePage() {
         const {error} = await supabase.auth.signOut()
         error ? console.log(error) : null
         navigate("/")
-    }
-  
+  }
+
   // Fetches the homeworks & subjects data from the database
+  const fetchHomeworks = async () => {
+    const { data, error } = await supabase.from('homeworks').select();
+
+    if (error) {
+      console.error(error);
+    }
+
+    if (data) {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const filteredHomeworks = data.filter(homework => homework.userid === userId);
+      let totalTime = 0;
+      filteredHomeworks.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
+      setHomeworks(filteredHomeworks);
+      setWorkTimeLeft(totalTime);
+    }
+  };
+
+  const fetchSubjects = async () => {
+    const { data, error } = await supabase.from('subjects').select();
+
+    if (error) {
+      console.error(error);
+    }
+
+    // Map the fetched data to an array of subjects and add a default subject
+    if (data) {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const filteredSubjects = data.filter(subject => subject.userid === userId);
+      const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
+      setSubjects(subjects);
+    }
+  };
+
   useEffect(() => {
-    const fetchHomeworks = async () => {
-      const { data, error } = await supabase.from('homeworks').select();
-
-      if (error) {
-        console.error(error);
-      }
-
-      if (data) {
-        const userId = (await supabase.auth.getUser()).data.user?.id;
-        const filteredHomeworks = data.filter(homework => homework.userid === userId);
-        let totalTime = 0;
-        filteredHomeworks.map(homework => {!homework.done ? totalTime += Number(homework.time) : null});
-        setHomeworks(filteredHomeworks);
-        setWorkTimeLeft(totalTime);
-      }
-    };
-
-    const fetchSubjects = async () => {
-      const { data, error } = await supabase.from('subjects').select();
-
-      if (error) {
-        console.error(error);
-      }
-
-      // Map the fetched data to an array of subjects and add a default subject
-      if (data) {
-        const userId = (await supabase.auth.getUser()).data.user?.id;
-        const filteredSubjects = data.filter(subject => subject.userid === userId);
-        const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
-        setSubjects(subjects);
-      }
-    };
-
     fetchHomeworks();
-    fetchSubjects();
-  }, [homeworks, subjects]);
+
+    supabase
+      .channel('homeworks-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'homeworks',
+        },
+        (payload) => {
+          fetchHomeworks();
+        }
+      )
+      .subscribe()
+  }, [])
+
+  useEffect(() => {
+    fetchSubjects()
+    supabase
+    .channel('subjects-db-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'subjects',
+      },
+      (payload) => {
+        fetchSubjects();
+      }
+    )
+    .subscribe()
+  })
+
 
   const formatDate = (date: Date): string => {
     const monthNames = [
@@ -98,7 +133,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.created_at.toISOString()} homework={homework} /> 
+                <HomeworkCard key={homework.id} homework={homework} /> 
               </motion.div>
             ))
           ) : (
@@ -111,7 +146,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.created_at.toISOString()} homework={homework} />
+                <HomeworkCard key={homework.id} homework={homework} />
               </motion.div>
             ))
           )}

@@ -16,47 +16,77 @@ export function AddHomework() {
     const [deadline, setDeadline] = useState<string>('');
     const [subjects, setSubjects] = useState<string[]>([]);
 
+    const fetchSubjects = async () => {
+        const { data, error } = await supabase.from('subjects').select();
+
+        if (error) {
+            console.error(error);
+        }
+
+        // Map the fetched data to an array of subjects and add a default subject
+        if (data) {
+            const userId = (await supabase.auth.getUser()).data.user?.id;
+            const filteredSubjects = data.filter(subject => subject.userid === userId);
+            const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
+            setSubjects(subjects);
+        }
+    };
+
     useEffect(() => {
-        const fetchSubjects = async () => {
-            const { data, error } = await supabase.from('subjects').select();
-    
-            if (error) {
-                console.error(error);
-            }
-    
-            // Map the fetched data to an array of subjects and add a default subject
-            if (data) {
-                const userId = (await supabase.auth.getUser()).data.user?.id;
-                const filteredSubjects = data.filter(subject => subject.userid === userId);
-                const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
-                setSubjects(subjects);
-            }
-        };
-    
         fetchSubjects();
-    }, [subjects]);
+    
+        supabase
+          .channel('subjects-db-changes')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'subjects',
+            },
+            (payload) => {
+              fetchSubjects();
+            }
+          )
+          .subscribe()
+    })
+    
+
+    
 
     async function addNewHomework() {
         const currentDate = new Date();
         const deadlineDate = deadline ? new Date(deadline) : null;
         const deadlineDifferenceInDays = deadlineDate ? Math.ceil((deadlineDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
+        const { data } = await supabase.from('homeworks').select();
+        let ids: number[] = [];
+        if (data) {
+            ids = data?.map((homework) => homework.id);
+        }
+    
+        const maxId = Math.max(...ids)
 
         const newHomework = {
+            id: maxId !== -Infinity ? maxId + 1 : 1,
             created_at: currentDate,
             subject: subject,
             description: description.toString(),
             time: time,
             deadline: deadlineDifferenceInDays,
+            done: false,
             userid: (await supabase.auth.getUser()).data.user?.id,
         };
-
-        const { error } = await supabase
-            .from('homeworks')
-            .insert(newHomework)
-            .select();
-
-        if (error) {
-            console.error(`Error while inserting homework: ${error}`);
+        try {
+            const { error } = await supabase
+                .from('homeworks')
+                .insert(newHomework)
+                .select();
+    
+            if (error) {
+                console.error(`Error while inserting homework:`, error);
+            }
+        } catch (error) {
+            console.error(`Error while inserting homework:`, error);
         }
     }
 
@@ -70,7 +100,7 @@ export function AddHomework() {
         const maxId = Math.max(...ids) 
 
         const newSubject = {
-            id: maxId+1,
+            id: maxId !== -Infinity ? maxId + 1 : 0,
             subject: subject,
             userid: (await supabase.auth.getUser()).data.user?.id
         };

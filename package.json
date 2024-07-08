@@ -1,6 +1,6 @@
 {
   "name": "studysmart",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "",
   "main": "./out/main/index.js",
   "author": "Damien RIFFLART",
@@ -33,6 +33,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/realtime-js": "^2.10.4",
     "@supabase/supabase-js": "^2.44.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
