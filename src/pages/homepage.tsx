@@ -8,7 +8,7 @@ import {useEffect, useState} from 'react'
 import {motion} from "framer-motion"
 import {useNavigate} from "react-router-dom"
 import {Bin} from '@/components/bin'
-import { access } from "fs"
+import {LeaderBoard} from '@/components/leader-board'
 
 interface Homework {
     id: number,
@@ -26,6 +26,7 @@ function HomePage() {
     const [workTimeLeft, setWorkTimeLeft] = useState<number>(0);
     const [showAddHomework, setShowAddHomework] = useState<boolean>(false);
     const [subjects, setSubjects] = useState<string[]>([]);
+    const [spe, setSpe] = useState<boolean>(false)
     const navigate = useNavigate();
 
   async function signOut() {
@@ -62,15 +63,16 @@ function HomePage() {
     // Map the fetched data to an array of subjects and add a default subject
     if (data) {
       const userId = (await supabase.auth.getUser()).data.user?.id;
-      const filteredSubjects = data.filter(subject => subject.userid === userId);
+      const filteredSubjects = data.filter(subject => subject.userid === userId && subject.spé === false);
       const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
       setSubjects(subjects);
     }
   };
 
   useEffect(() => {
+    fetchSubjects();
     fetchHomeworks();
-
+  
     supabase
       .channel('homeworks-db-changes')
       .on(
@@ -80,31 +82,27 @@ function HomePage() {
           schema: 'public',
           table: 'homeworks',
         },
-        (payload) => {
+        (_payload) => {
           fetchHomeworks();
         }
       )
-      .subscribe()
-  }, [])
-
-  useEffect(() => {
-    fetchSubjects()
+      .subscribe();
+  
     supabase
-    .channel('subjects-db-changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'subjects',
-      },
-      (payload) => {
-        fetchSubjects();
-      }
-    )
-    .subscribe()
-  })
-
+      .channel('subjects-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subjects',
+        },
+        (_payload) => {
+          fetchSubjects();
+        }
+      )
+      .subscribe();
+  }, []);
 
   const formatDate = (date: Date): string => {
     const monthNames = [
@@ -116,6 +114,35 @@ function HomePage() {
     const year = date.getFullYear();
     return `${day} ${month} ${year}`;
   };
+
+  const createSpe = async (subject: string) => {
+    setSpe(!spe);
+
+    const { data } = await supabase
+      .from('subjects')
+      .select();
+
+      const hasSpeSubject = data?.some(subjectItem => subjectItem.subject === `Spé ${subject}`);
+
+      if (data && hasSpeSubject === false) {
+        let ids: number[] = [];
+        ids = data.map((subjectItem: { id: number }) => subjectItem.id);
+        const maxId = Math.max(...ids) || 0;
+  
+        const newSpéSubject = {
+          subject: `Spé ${subject}`,
+          id: maxId !== -Infinity ? maxId + 1 : 0,
+          spé: true,
+          userid: (await supabase.auth.getUser()).data.user?.id,
+        };
+  
+        await supabase
+          .from('subjects')
+          .insert(newSpéSubject)
+          .select();
+      }
+
+  }
 
   const renderHomeworkCard = (activeTab: string) => {
     const filteredHomeworks = homeworks.filter(homework => homework.subject === activeTab);
@@ -170,7 +197,8 @@ function HomePage() {
           </div>
         </div>
 
-        <div className="absolute top-5 right-5">
+        <div className="absolute top-5 right-5 flex flex-row gap-3">
+          <LeaderBoard />
           <Button variant="outline" onClick={() => signOut()}>Se déconnecter</Button>
         </div>
 
@@ -199,9 +227,20 @@ function HomePage() {
             {
               subjects.map(subject => (
                 <TabsContent key={subject} value={subject}>
-                  <div className="mt-3">
-                    {renderHomeworkCard(subject)}
+                  <div className="mt-3 text-2xl">
+                    { !spe ? (
+                      <>
+                        <h1>{subject}</h1>
+                        {renderHomeworkCard(subject)}
+                      </>
+                      ) : (
+                        <>
+                        <h1>{`Spé ${subject}`}</h1>
+                        {renderHomeworkCard(`Spé ${subject}`)}
+                      </>
+                    )}
                   </div>
+                  <Button onClick={() => createSpe(subject)} className="text-xl font-normal mb-3 mt-3">{spe ? `Voir ${subject}` : `Voir spé ${subject}`}</Button>
                 </TabsContent>
               ))
             }

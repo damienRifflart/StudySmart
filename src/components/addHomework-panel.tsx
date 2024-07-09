@@ -36,7 +36,7 @@ export function AddHomework() {
         fetchSubjects();
     
         supabase
-          .channel('subjects-db-changes')
+          .channel('subject-db-changes')
           .on(
             'postgres_changes',
             {
@@ -44,7 +44,7 @@ export function AddHomework() {
               schema: 'public',
               table: 'subjects',
             },
-            (payload) => {
+            (_payload) => {
               fetchSubjects();
             }
           )
@@ -67,7 +67,7 @@ export function AddHomework() {
         const maxId = Math.max(...ids)
 
         const newHomework = {
-            id: maxId !== -Infinity ? maxId + 1 : 1,
+            id: maxId !== -Infinity ? maxId + 1 : 0,
             created_at: currentDate,
             subject: subject,
             description: description.toString(),
