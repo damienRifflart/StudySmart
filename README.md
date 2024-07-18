@@ -9,6 +9,9 @@
 
 <h4 align="center">Create homeworks with deadlines, custom subjects, times and more.</h4>
 
+I have mainly coded this application for me, since I personally find it usefull in my studies. However, anyone can use it and create an account.
+Feel free to contribute, suggest a feature, or report any bug (there might be some I didn't see).
+
 ## Key Features
 
 * Create homework cards
