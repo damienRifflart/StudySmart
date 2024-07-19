@@ -9,7 +9,7 @@ import {Calendar} from "@/components/ui/calendar"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
 import {useEffect, useState} from 'react'
 
-export function AddHomework() {
+export function AddHomework({setIsLoading}) {
     const [subject, setSubject] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [time, setTime] = useState<string>('');
@@ -55,6 +55,7 @@ export function AddHomework() {
     
 
     async function addNewHomework() {
+        setIsLoading(true)
         const currentDate = new Date();
         const deadlineDate = deadline ? new Date(deadline) : null;
         const deadlineDifferenceInDays = deadlineDate ? Math.ceil((deadlineDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)) : null;
@@ -81,6 +82,7 @@ export function AddHomework() {
                 .from('homeworks')
                 .insert(newHomework)
                 .select();
+            setIsLoading(false)
     
             if (error) {
                 console.error(`Error while inserting homework:`, error);
@@ -91,6 +93,7 @@ export function AddHomework() {
     }
 
     async function addNewSubject() {
+        setIsLoading(true)
         const { data } = await supabase.from('subjects').select();
         let ids: number[] = [];
         if (data) {
@@ -109,6 +112,8 @@ export function AddHomework() {
             .from('subjects')
             .insert(newSubject)
             .select();
+        
+        setIsLoading(false)
 
         if (error) {
             console.error(`Error while inserting subject: ${error}`);

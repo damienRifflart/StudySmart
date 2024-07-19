@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import {Button} from "@/components/ui/button";
 import supabase from '@/config/supabaseClient'
 
-export function DeletedHomework({homework}) {
+export function DeletedHomework({homework, setIsLoading}) {
     useEffect(() => {
         const fifteenDaysAgo = new Date()
         fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15)
@@ -19,10 +19,14 @@ export function DeletedHomework({homework}) {
     }, [])
 
     async function undoToggle() {
+        setIsLoading(true)
         const { error } = await supabase
             .from('homeworks')
             .update({ done: false })
             .eq('created_at', homework.created_at)
+        
+        setIsLoading(false)
+
         error ? console.log(error) : null
     }
 

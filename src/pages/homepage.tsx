@@ -27,6 +27,7 @@ function HomePage() {
     const [showAddHomework, setShowAddHomework] = useState<boolean>(false);
     const [subjects, setSubjects] = useState<string[]>([]);
     const [spe, setSpe] = useState<boolean>(false)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
     const navigate = useNavigate();
 
   async function signOut() {
@@ -160,7 +161,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.id} homework={homework} /> 
+                <HomeworkCard key={homework.id} homework={homework} setIsLoading={setIsLoading} /> 
               </motion.div>
             ))
           ) : (
@@ -173,7 +174,7 @@ function HomePage() {
                 }}
                 transition={{ duration: 0.2 }}
                 >
-                <HomeworkCard key={homework.id} homework={homework} />
+                <HomeworkCard key={homework.id} homework={homework} setIsLoading={setIsLoading} />
               </motion.div>
             ))
           )}
@@ -184,7 +185,17 @@ function HomePage() {
   
   return (
     <>
-      <div>
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="text-5xl text-white flex flex-row">
+            <p>Chargement</p>
+            <div className="h-4 w-4 bg-foreground rounded-full animate-bounce [animation-delay:-0.3s] mt-6 mr-1 ml-1"></div>
+            <div className="h-4 w-4 bg-foreground rounded-full animate-bounce [animation-delay:-0.2s] mt-6 mr-1"></div>
+            <div className="h-4 w-4 bg-foreground rounded-full animate-bounce [animation-delay:-0.1s] mt-6"></div>
+          </div>
+        </div>
+      )}
+      <div className={isLoading ? 'blur-lg' : ''}>
         <div className="top-5 left-5 relative">
           <div className="text-4xl font-semibold w-screen">
             <div className="absolute">
@@ -202,8 +213,7 @@ function HomePage() {
           <Button variant="outline" onClick={() => signOut()}>Se déconnecter</Button>
         </div>
 
-        <Bin homeworks={homeworks} />
-
+        <Bin homeworks={homeworks} setIsLoading={setIsLoading} />
 
         <div className="relative left-[7rem] top-20">
           <Tabs defaultValue="Tout" className="w-[70rem]">
@@ -258,7 +268,7 @@ function HomePage() {
           </div>
 
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{opacity: showAddHomework ? 1 : 0, y: showAddHomework ? 0 : -20}} transition={{ duration: 0.2 }} className='absolute right-[13rem] top-[5.5rem]'>
-            <AddHomework />
+            <AddHomework setIsLoading={setIsLoading} />
           </motion.div>
 
         </div>

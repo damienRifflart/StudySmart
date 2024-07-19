@@ -1,12 +1,15 @@
 import { Button } from '@/components/ui/button'
 import supabase from '@/config/supabaseClient'
-export function HomeworkCard({ homework }) {
+export function HomeworkCard({ homework, setIsLoading }) {
 
     async function doneToggleBtn() {
+        setIsLoading(true)
         const { error } = await supabase
             .from('homeworks')
             .update({ done: true })
             .eq('created_at', homework.created_at)
+
+        setIsLoading(false)    
         error ? console.log(error) : null
     }
 

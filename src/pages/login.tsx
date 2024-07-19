@@ -44,7 +44,7 @@ function Login() {
                 </div>
             </div>
             <div className="absolute bottom-4 right-4">
-                <p className="text-2xl text-slate-400">v0.2.5</p>
+                <p className="text-2xl text-slate-400">v0.2.6</p>
             </div>
         </>
     )
