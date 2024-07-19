@@ -1,34 +1,46 @@
-# studysmart
 
-An Electron application with React and TypeScript
+<h1 align="center">
+  <br>
+  <img src="./resources/icon.png" alt="StudySmartIcon" width="200"></a>
+  <br>
+  StudySmart
+  <br>
+</h1>
 
-## Recommended IDE Setup
+<h4 align="center">Create homeworks with deadlines, custom subjects, times and more.</h4>
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+I have mainly coded this application for me, since I personally find it usefull in my studies. However, anyone can use it and create an account.
+Feel free to contribute, suggest a feature, or report any bug (there might be some I didn't see).
 
-## Project Setup
+## Key Features
 
-### Install
+* Create homework cards
+* Create subjects and spécialités (French school system)
+* Leaderboard for the best students (the more you work, the more points you gain)
+* Accounts 
 
-```bash
-$ npm install
-```
+## How to contribute
+- Fork the repository
+- Code
+- Open a pull request
 
-### Development
+> **Note**
+> If you have a great idea for StudySmart, but can not code or don't want to, please contact me at rifflartdamiencontact@gmail.com or via discord: odams.
 
-```bash
-$ npm run dev
-```
+## Made with:
+- [Electron-vite](https://electron-vite.org/)
+- [React](https://react.dev/)
+- [Typescript](https://www.typescriptlang.org/)
+- [Supabase](https://supabase.com/) (database)
+- [Shadncui](https://ui.shadcn.com/) (components)
 
-### Build
+## You may also like...
 
-```bash
-# For windows
-$ npm run build:win
+- [Shapy](https://github.com/damienRifflart/Shapy) - An iOs sport application.
+- [Marks](https://github.com/damienRifflart/StudyStats) - Automatically get the number of hours, and classes for the next 100 days.
 
-# For macOS
-$ npm run build:mac
+## Contact
 
-# For Linux
-$ npm run build:linux
-```
+> Gmail: [rifflartdamiencontact@gmail.com](rifflartdamiencontact@gmail.com) &nbsp;&middot;&nbsp;
+> GitHub: [@damienRifflart](https://github.com/damienRifflart) &nbsp;&middot;&nbsp;
+
