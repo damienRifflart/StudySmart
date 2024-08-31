@@ -26,7 +26,7 @@ export function AddHomework({setIsLoading}) {
         // Map the fetched data to an array of subjects and add a default subject
         if (data) {
             const userId = (await supabase.auth.getUser()).data.user?.id;
-            const filteredSubjects = data.filter(subject => subject.userid === userId);
+            const filteredSubjects = data.filter(subject => subject.user_id === userId);
             const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
             setSubjects(subjects);
         }
@@ -34,7 +34,7 @@ export function AddHomework({setIsLoading}) {
 
     useEffect(() => {
         fetchSubjects();
-    
+
         supabase
           .channel('subject-db-changes')
           .on(
@@ -105,14 +105,14 @@ export function AddHomework({setIsLoading}) {
         const newSubject = {
             id: maxId !== -Infinity ? maxId + 1 : 0,
             subject: subject,
-            userid: (await supabase.auth.getUser()).data.user?.id
+            user_id: (await supabase.auth.getUser()).data.user?.id
         };
 
         const { error } = await supabase
             .from('subjects')
             .insert(newSubject)
             .select();
-        
+
         setIsLoading(false)
 
         if (error) {

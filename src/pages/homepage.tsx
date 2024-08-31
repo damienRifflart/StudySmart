@@ -64,7 +64,7 @@ function HomePage() {
     // Map the fetched data to an array of subjects and add a default subject
     if (data) {
       const userId = (await supabase.auth.getUser()).data.user?.id;
-      const filteredSubjects = data.filter(subject => subject.userid === userId && subject.spé === false);
+      const filteredSubjects = data.filter(subject => subject.user_id === userId && subject.spé === false);
       const subjects = [...filteredSubjects.map(({ subject }: { subject: string }) => subject)];
       setSubjects(subjects);
     }
@@ -88,7 +88,7 @@ function HomePage() {
         }
       )
       .subscribe();
-  
+
     supabase
       .channel('subjects-db-changes')
       .on(
@@ -134,7 +134,7 @@ function HomePage() {
           subject: `Spé ${subject}`,
           id: maxId !== -Infinity ? maxId + 1 : 0,
           spé: true,
-          userid: (await supabase.auth.getUser()).data.user?.id,
+          user_id: (await supabase.auth.getUser()).data.user?.id,
         };
   
         await supabase
@@ -202,8 +202,8 @@ function HomePage() {
               <ModeToggle />
             </div>
             <div className="ml-[6rem] flex flex-col">
-              <h1>Bonjour, <span className='text-primary'>Damien</span></h1>
-              <h1>On est le <span>{formatDate(new Date())}</span></h1>
+              <h1>Bonjour,</h1>
+              <h1>On est le <span className="text-primary">{formatDate(new Date())}</span></h1>
             </div>
           </div>
         </div>
