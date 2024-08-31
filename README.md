@@ -12,6 +12,13 @@
 I have mainly coded this application for me, since I personally find it usefull in my studies. However, anyone can use it and create an account.
 Feel free to contribute, suggest a feature, or report any bug (there might be some I didn't see).
 
+## Screenshots
+![](public/0.png?raw=true)
+![](public/1.png?raw=true)
+<img src="public/2.png?raw=true" width="45%" style="display: inline-block; vertical-align: top;"/>
+<img src="public/3.png?raw=true" width="45%" style="display: inline-block; vertical-align: top;"/>
+![](public/4.png?raw=true)
+
 ## Key Features
 
 * Create homework cards
