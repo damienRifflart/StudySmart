@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-start-color: #0a111f;
+  --bg-end-color: #0b0845;
+  --foreground: #fbfbfe;
+
+  --card: #0c0c18;
+  --card-foreground: #f8fafc;
+
+  --accent: #3a31d8;
+  --accent-foreground: #fbfbfe;
+
+  background: linear-gradient(to right, var(--bg-start-color), var(--bg-end-color));
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+}
