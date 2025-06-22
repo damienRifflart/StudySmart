@@ -32,7 +32,7 @@ Feel free to contribute, suggest a feature, or report any bug (there might be so
 - Open a pull request
 
 > **Note**
-> If you have a great idea for StudySmart, but can not code or don't want to, please contact me at rifflatdamien68@gmail.com or via discord: odams.
+> If you have a great idea for StudySmart, but can not code or don't want to, please contact me at rifflartdamien68@gmail.com or via discord: odams.
 
 ## Made with:
 - [Electron-vite](https://electron-vite.org/)
